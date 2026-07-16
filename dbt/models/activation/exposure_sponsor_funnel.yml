@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: exposure_sponsor_funnel
+    description: >
+      Sanofi patient funnel (processed → reviewed → enrolled) aggregated by
+      trial and country. Grain is one row per (trial_id, country_code).
+      Powers the sponsor-facing dashboard question: for a given trial or
+      country, how many patients moved through each funnel stage, and what
+      share converted.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - trial_id
+              - country_code
+    columns:
+      - name: trial_id
+        description: Foreign key to the trial.
+        tests:
+          - not_null
+      - name: trial_name
+        description: Internal code name for the trial.
+      - name: country_code
+        description: ISO 3166-1 alpha-2 country code.
+        tests:
+          - not_null
+      - name: country_name
+        description: Full English name of the country.
+      - name: processed_count
+        description: Number of patient-trial matches that reached the processed stage.
+        tests:
+          - not_null
+      - name: reviewed_count
+        description: Number of matches that reached the reviewed stage.
+        tests:
+          - not_null
+      - name: enrolled_count
+        description: Number of matches that reached the enrolled stage.
+        tests:
+          - not_null
+      - name: review_rate
+        description: reviewed_count / processed_count.
+      - name: enrollment_rate
+        description: enrolled_count / processed_count.
+
+exposures:
+  - name: sponsor_funnel_dashboard
+    label: Sponsor Funnel Dashboard (Sanofi)
+    type: dashboard
+    maturity: high
+    url: https://dashboard.internal.example.com/sanofi/funnel
+    description: >
+      Embedded dashboard for Sanofi showing, per trial and country, how
+      patients move through the processed → reviewed → enrolled funnel and
+      the resulting review/enrollment conversion rates.
+    depends_on:
+      - ref('exposure_sponsor_funnel')
+    owner:
+      name: Maxime Faivre
+      email: maxime@faivrem.fr
+    tags: ['sanofi', 'sponsor-funnel']
