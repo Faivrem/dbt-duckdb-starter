@@ -1,0 +1,4 @@
+{
+    "dbt.lineage.defaultExpansion": 3,
+    "dbt.perspectiveTheme": "Vintage"
+}
