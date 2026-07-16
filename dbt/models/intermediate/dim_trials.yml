@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: mart_trials
+  - name: dim_trials
     description: >
       Trial dimension table. One row per clinical trial.
       Each trial belongs to one sponsor and targets one indication.
@@ -10,7 +10,7 @@ models:
         description: Primary key. Unique identifier for the clinical trial (e.g. tr_0001).
       - name: sponsor_id
         description: Foreign key to dim_sponsors. The sponsor funding this trial.
-      - name: trialName
+      - name: trial_name
         description: Internal code name for the trial (e.g. Aspire-342).
       - name: indication
         description: Medical condition or disease targeted by the trial (e.g. Non-Small Cell Lung Cancer).

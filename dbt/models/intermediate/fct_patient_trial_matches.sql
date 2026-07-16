@@ -10,9 +10,9 @@ with matches as (
     patient_id
     , trial_id
     , site_id
-    , processedAt
-    , reviewedAt
-    , enrolledAt
+    , processedAt as processed_at
+    , reviewedAt as reviewed_at
+    , enrolledAt as enrolled_at
   from matches
 
 )

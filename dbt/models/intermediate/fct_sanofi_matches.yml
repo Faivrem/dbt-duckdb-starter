@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: fct_sanofi_matches
+    description: >
+      Match-grain fact table scoped to a single sponsor (Sanofi / sp_001 by
+      default, overridable via the `sponsor_id` dbt var). One row per
+      patient-trial match, enriched with trial and site/country context and
+      boolean flags for each funnel stage (processed → reviewed → enrolled).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - patient_id
+            - trial_id
+    columns:
+      - name: patient_id
+        description: Identifier for the patient.
+        tests:
+          - not_null
+      - name: trial_id
+        description: Foreign key to the trial this patient was matched to.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_trials')
+              field: trial_id
+      - name: sponsor_id
+        description: Foreign key to the sponsor funding the trial. Constant for a given build (filtered by the `sponsor_id` var).
+        tests:
+          - not_null
+      - name: site_id
+        description: Foreign key to the site where this match was processed.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_sites')
+              field: site_id
+      - name: trial_name
+        description: Internal code name for the trial.
+      - name: indication
+        description: Medical condition or disease targeted by the trial.
+      - name: phase
+        description: Clinical trial phase (Phase I, II, III, or IV).
+      - name: status
+        description: Current recruitment status of the trial.
+      - name: country_code
+        description: ISO 3166-1 alpha-2 country code of the site.
+      - name: country_name
+        description: Full English name of the site's country.
+      - name: processed_at
+        description: Timestamp when the patient was first processed for this trial. Always populated.
+        tests:
+          - not_null
+      - name: reviewed_at
+        description: Timestamp when the match was reviewed. Null if not yet reviewed.
+      - name: enrolled_at
+        description: Timestamp when the patient was enrolled. Null if not enrolled.
+      - name: is_processed
+        description: Always true — every row has reached the processed stage.
+      - name: is_reviewed
+        description: True if the match has reached the reviewed stage.
+      - name: is_enrolled
+        description: True if the match has reached the enrolled stage.

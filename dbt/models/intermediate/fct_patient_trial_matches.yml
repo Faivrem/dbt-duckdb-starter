@@ -13,9 +13,9 @@ models:
         description: Foreign key to dim_trials. The trial this patient was matched to.
       - name: site_id
         description: Foreign key to dim_sites. The site where this match was processed.
-      - name: processedAt
+      - name: processed_at
         description: Timestamp when the patient was first processed (matched) for this trial. Always populated.
-      - name: reviewedAt
+      - name: reviewed_at
         description: Timestamp when the match was reviewed by the site. Null if not yet reviewed.
-      - name: enrolledAt
+      - name: enrolled_at
         description: Timestamp when the patient was enrolled in the trial. Null if not enrolled.
