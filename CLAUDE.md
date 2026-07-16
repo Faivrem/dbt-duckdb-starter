@@ -48,13 +48,13 @@ This is exactly what `.devcontainer/setup.sh` runs on Codespace creation, so it'
 **Data flow**: `data/raw/*.csv` (generated) → `dbt/seeds/*.csv` (copy dbt loads) → seed tables `raw_sponsors`, `raw_trials`, `raw_sites`, `raw_patient_trial_matches` → staging models → mart/dim/fct models. All models materialize as `table` by default (`dbt_project.yml`), not view/incremental.
 
 **Model layers** (`dbt/models/`):
-- `staging/` — one staging model per raw source (`stg_sponsors`, `stg_trials`, `stg_patient_trial_matches`, `staging_sites`), thin passthrough selects from the seed via `{{ ref(...) }}`.
-- Top-level mart/dimension/fact models sit directly in `models/` (not yet organized into a `mart/` subfolder as of this writing, though an empty `mart/` dir exists as scaffolding): `dim_sponsors`, `mart_trials`, `sites_mart`, `fct_patient_trial_matches`. Each follows the same `with <source> as (select * from {{ ref(...) }}), final as (select ... from <source>) select * from final` CTE pattern.
+- `staging/` — one staging model per raw source (`stg_sponsors`, `stg_trials`, `stg_patient_trial_matches`, `stg_sites`), thin passthrough selects from the seed via `{{ ref(...) }}` that also rename source columns to `snake_case`.
+- Top-level mart/dimension/fact models sit directly in `models/` (not yet organized into a `mart/` subfolder as of this writing, though an empty `mart/` dir exists as scaffolding): `dim_sponsors`, `dim_trials`, `dim_sites`, `fct_patient_trial_matches`. Each follows the same `with <source> as (select * from {{ ref(...) }}), final as (select ... from <source>) select * from final` CTE pattern.
 - `intermediate/` and `activation/` are currently empty scaffold directories for layers not yet built out. `activation/` is where sponsor-facing/exposure-style models (built for a specific downstream consumer, e.g. a dashboard exposure) belong per the case study brief.
 
 Every model has a co-located `.yml` file with the same basename documenting its description and column descriptions (dbt's `models:` schema spec), rather than one big `schema.yml`. Follow that convention for any new model.
 
-**Core entity relationships**: `dim_sponsors` (1) → `mart_trials` (many, via `sponsor_id`) → `fct_patient_trial_matches` (many, via `trial_id`), which also references `site_id` (→ `sites_mart`). `fct_patient_trial_matches` is the funnel fact table: `processedAt` is always populated, `reviewedAt`/`enrolledAt` are progressively-nullable timestamps representing the funnel stages.
+**Core entity relationships**: `dim_sponsors` (1) → `dim_trials` (many, via `sponsor_id`) → `fct_patient_trial_matches` (many, via `trial_id`), which also references `site_id` (→ `dim_sites`). `fct_patient_trial_matches` is the funnel fact table: `processed_at` is always populated, `reviewed_at`/`enrolled_at` are progressively-nullable timestamps representing the funnel stages.
 
 **dbt packages**: `dbt-labs/dbt_utils` 1.3.0 (see `dbt/packages.yml`, locked in `dbt/package-lock.yml`); installed into `dbt/dbt_packages/` by `dbt deps`.
 
