@@ -5,17 +5,38 @@ models:
     description: >
       Staged patient-trial match records. Each row represents one patient
       being matched to one trial at one site. The funnel timestamps track
-      progression through processed → reviewed → enrolled.
+      progression through processed → reviewed → enrolled. Rows are deduped
+      to one per (patient_id, trial_id), keeping the furthest funnel stage
+      reached, and synthetic test_patient_* rows are excluded.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - patient_id
+            - trial_id
     columns:
       - name: patient_id
         description: Identifier for the patient (e.g. pat_12345). Not globally unique — a patient can appear in multiple trials.
+        tests:
+          - not_null
       - name: trial_id
         description: Foreign key to the trial this patient was matched to.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_trials')
+              field: trial_id
       - name: site_id
         description: Foreign key to the site where this match was processed.
-      - name: processedAt
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_sites')
+              field: site_id
+      - name: processed_at
         description: Timestamp when the patient was first processed (matched) for this trial. Always populated.
-      - name: reviewedAt
+        tests:
+          - not_null
+      - name: reviewed_at
         description: Timestamp when the match was reviewed by the site. Null if not yet reviewed.
-      - name: enrolledAt
+      - name: enrolled_at
         description: Timestamp when the patient was enrolled in the trial. Null if not enrolled.

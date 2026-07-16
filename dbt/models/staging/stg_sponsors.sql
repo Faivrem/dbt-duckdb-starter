@@ -1,6 +1,6 @@
 with source as (
 
-  select * from read_csv_auto('seeds/raw_sponsors.csv')
+  select * from {{ ref('raw_sponsors') }}
 
 )
 
@@ -9,8 +9,9 @@ with source as (
   select
     sponsor_id
     , sponsor_name
-    , createdAt
+    , createdAt as created_at
   from source
+  where sponsor_id <> 'sp_099'
 
 )
 

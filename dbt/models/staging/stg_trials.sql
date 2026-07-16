@@ -9,13 +9,14 @@ with source as (
   select
     trial_id
     , sponsor_id
-    , trialName
+    , trialName as trial_name
     , indication
     , phase
     , status
     , start_date
     , end_date
   from source
+  where trial_id <> 'tr_0146'
 
 )
 
